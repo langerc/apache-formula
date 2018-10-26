@@ -19,6 +19,9 @@
     {%- endfor %}
     {%- for listen in listen_directives %}
 Listen  {{ listen }}
+<IfModule mod_ssl.c>
+Listen *:443
+</IfModule>
     {%- endfor %}
 {%- else %}
 Listen 80
