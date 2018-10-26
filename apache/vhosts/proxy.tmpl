@@ -144,8 +144,28 @@
         'Require': dir.get('Require', vals.Directory.Require),
         'AllowOverride': dir.get('AllowOverride', vals.Directory.AllowOverride),
         'Dav': dir.get('Dav', False),
-    } %}   
- {%- endfor %}
+    } %}
+
+    {%- if path == 'default' %}{% set path = vals.Directory_default %}{% endif %}
+
+    <Directory "{{ path }}">
+        {% if dvals.get('Options') != False %}Options {{ dvals.Options }}{% endif %}
+        {% if map.version == '2.4' %}
+        {% if dvals.get('Require') != False %}Require {{dvals.Require}}{% endif %}
+        {% else %}
+        {% if dvals.get('Order') != False %}Order {{ dvals.Order }}{% endif %}
+        {% if dvals.get('Allow') != False %}Allow {{ dvals.Allow }}{% endif %}
+        {% endif %}
+        {% if dvals.get('AllowOverride') != False %}AllowOverride {{ dvals.AllowOverride }}{% endif %}
+        {% if dvals.get('Dav') != False %}Dav On{% endif %}
+
+        {% if dir.get('Formula_Append') %}
+        {{ dir.Formula_Append|indent(8) }}
+        {% endif %}
+    </Directory>
+    {%- endfor %}
+    
+{%- endfor %}
     {% if site.get('Formula_Append') %}
     {{ site.Formula_Append|indent(4) }}
     {% endif %}
