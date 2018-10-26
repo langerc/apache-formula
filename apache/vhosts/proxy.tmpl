@@ -4,6 +4,7 @@
 {# Define default values here so the template below can just focus on layout #}
 {% from "apache/map.jinja" import apache with context %}
 {% set sitename = site.get('ServerName', id) %}
+{% set documentroot = site.get('DocumentRoot', '{0}/{1}'.format(apache.wwwdir, site.get('ServerName', id))) %}
 {% set vals = {
     'interfaces': site.get('interface', '*').split(),
     'port': site.get('port', '80'),
@@ -20,9 +21,19 @@
     'LogFormat': site.get('LogFormat', '"%a %l %u %t \\"%r\\" %>s %O \\"%{Referer}i\\" \\"%{User-Agent}i\\""'),
     'CustomLog': site.get('CustomLog', '{0}/{1}-access.log'.format(map.logdir, sitename)),
 
+    'DocumentRoot': site.get('DocumentRoot', '{0}/{1}'.format(map.wwwdir, sitename)),
     'ProxyRequests': site.get('ProxyRequests', 'Off'),
     'ProxyPreserveHost': site.get('ProxyPreserveHost', 'On'),
     'ProxyRoute': site.get('ProxyRoute', {}),
+    
+    'Directory_default': site.get('DocumentRoot', '{0}/{1}'.format(map.wwwdir, sitename)),
+    'Directory': {
+        'Options': '-Indexes +FollowSymLinks',
+        'Order': 'allow,deny',
+        'Allow': 'from all',
+        'Require': 'all granted',
+        'AllowOverride': 'None',
+    },
 
     'Location': {
         'Order': 'allow,deny',
@@ -46,7 +57,8 @@
     {% if site.get('LogFormat') != False -%}LogFormat {{ vals.LogFormat }}{% endif %}
     {% if site.get('CustomLog') != False -%}LogFormat {{ vals.LogFormat }} {{ sitename }}
     CustomLog {{ vals.CustomLog }} {{ sitename }}{% endif %}
-
+    {% if site.get('DocumentRoot') != False -%}DocumentRoot {{ vals.DocumentRoot }}{% endif %}
+    
     {% if site.get('SSLCertificateFile') %}SSLEngine on
     SSLCertificateFile {{ site.SSLCertificateFile }}
     {% if site.get('SSLCertificateKeyFile') %}SSLCertificateKeyFile {{ site.SSLCertificateKeyFile }}{% endif %}
@@ -124,6 +136,15 @@
       Require ip {% for every_ip in ip_list %}{{ every_ip }} {% endfor %} {% endif %}
      {%- endif %}
    </Proxy>
+    {%- for path, dir in site.get('Directory', {}).items() -%}
+    {%- set dvals = {
+        'Options': dir.get('Options', vals.Directory.Options),
+        'Order': dir.get('Order', vals.Directory.Order),
+        'Allow': dir.get('Allow', vals.Directory.Allow),
+        'Require': dir.get('Require', vals.Directory.Require),
+        'AllowOverride': dir.get('AllowOverride', vals.Directory.AllowOverride),
+        'Dav': dir.get('Dav', False),
+    } %}   
  {%- endfor %}
     {% if site.get('Formula_Append') %}
     {{ site.Formula_Append|indent(4) }}
