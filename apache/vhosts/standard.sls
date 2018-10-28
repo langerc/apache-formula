@@ -28,6 +28,13 @@ apache_vhosts_{{ id }}:
     - user: {{ site.get('DocumentRootUser', apache.get('document_root_user'))|json }}
     - group: {{ site.get('DocumentRootGroup', apache.get('document_root_group'))|json }}
     - allow_symlink: True
+{{ id }}-documentlog:
+  file.directory:
+    - name: {{ documentroot }}/logs
+    - makedirs: True
+    - user: {{ site.get('DocumentRootUser', apache.get('document_root_user'))|json }}
+    - group: {{ site.get('DocumentRootGroup', apache.get('document_root_group'))|json }}
+    - allow_symlink: True
 {% endif %}
 
 {% if grains.os_family == 'Debian' %}
