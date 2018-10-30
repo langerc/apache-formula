@@ -28,14 +28,14 @@ apache_vhosts_{{ id }}:
     - user: {{ site.get('DocumentRootUser', apache.get('document_root_user'))|json }}
     - group: {{ site.get('DocumentRootGroup', apache.get('document_root_group'))|json }}
     - allow_symlink: True
+{% endif %}
 {{ id }}-documentlog:
   file.directory:
-    - name: {{ documentroot }}/logs
+    - name: {{ apache.vhostdir }}/{{ id }}/logs
     - makedirs: True
     - user: {{ site.get('DocumentRootUser', apache.get('document_root_user'))|json }}
     - group: {{ site.get('DocumentRootGroup', apache.get('document_root_group'))|json }}
     - allow_symlink: True
-{% endif %}
 
 {% if grains.os_family == 'Debian' %}
 {% if site.get('enabled', True) %}
